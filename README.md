@@ -1,4 +1,4 @@
-# Day 11 — ASU Campus Perception: When KITTI Meets Arizona
+# Day 11 - ASU Campus Perception: When KITTI Meets Arizona
 
 > MS Robotics and Autonomous Systems, Arizona State University, Dec 2026
 
