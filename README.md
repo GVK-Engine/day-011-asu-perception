@@ -14,41 +14,33 @@ The short answer: it does not.
 
 ---
 
-## Live Demo
+## Failure Highlights
 
-[![Detection Demo](https://drive.google.com/thumbnail?id=1Y1hKLwYCygZ6e-bYi_DzgnDSyB1guhob&sz=w1280)](https://drive.google.com/file/d/1Y1hKLwYCygZ6e-bYi_DzgnDSyB1guhob/view)
+![Failure Highlights](failure_highlights.gif)
 
-*YOLOv8x running on all 8 ASU campus scenarios. 2,565 frames. Real Arizona footage. Click to view.*
+*Golf cart: 0 detections. Sun glare: classified as sports ball. ASU tram: labeled as train. Arizona bollards: called fire hydrants. These are not edge cases. They are systematic.*
 
 ---
 
 ## Germany vs Arizona: Same Detector, Different World
 
-[![Domain Shift](https://drive.google.com/thumbnail?id=1MZrBCFBThu1TFwLlpQ3WAkCEkNYJ_fHB&sz=w1280)](https://drive.google.com/file/d/1MZrBCFBThu1TFwLlpQ3WAkCEkNYJ_fHB/view)
+![Domain Shift](germany_vs_asu.gif)
 
-*Left: KITTI Germany, overcast, HDL-64E LiDAR car. Right: ASU Arizona, direct sun, iPhone. Same YOLOv8x model. Click to view.*
-
----
-
-## Failure Highlights
-
-[![Failure Highlights](https://drive.google.com/thumbnail?id=1xqhuXlebJZVao5eUxHyx4cOHvy7SkEnU&sz=w1280)](https://drive.google.com/file/d/1xqhuXlebJZVao5eUxHyx4cOHvy7SkEnU/view)
-
-*Golf cart: 0 detections. Sun glare: classified as sports ball. ASU tram: labeled as train. Arizona bollards: called fire hydrants. These are not edge cases. They are systematic. Click to view.*
+*Left: KITTI Germany, overcast, HDL-64E LiDAR car. Right: ASU Arizona, direct sun, iPhone. Same YOLOv8x model.*
 
 ---
 
-## Spatial Failure Heatmap
+## Full Demo Videos
 
-[![Failure Heatmap](https://drive.google.com/thumbnail?id=16MoiJ5gXWdKKqA8d4zYHC7u8CT_ioWtI&sz=w1280)](https://drive.google.com/file/d/16MoiJ5gXWdKKqA8d4zYHC7u8CT_ioWtI/view)
+[Detection Demo on All 8 ASU Scenarios](https://drive.google.com/file/d/1Y1hKLwYCygZ6e-bYi_DzgnDSyB1guhob/view)
 
-*Red regions accumulate where the detector fails across frames. Blue regions are reliable. Click to view.*
+[Spatial Failure Heatmap](https://drive.google.com/file/d/16MoiJ5gXWdKKqA8d4zYHC7u8CT_ioWtI/view)
 
 ---
 
 ## Experiment 1: The Vocabulary Gap
 
-![Vocabulary Gap](https://drive.google.com/thumbnail?id=1Qf5zxdGNAYzX0GowhzaR63DPOFS0pQqx&sz=w1280)
+![Vocabulary Gap](exp1_vocabulary_gap.png)
 
 COCO has 80 object classes. None of them are golf cart. None of them are ASU tram. None of them are Arizona bollard.
 
@@ -68,7 +60,7 @@ This is not a model failure. It is a vocabulary failure. No amount of training o
 
 ## Experiment 2: Sun Glare Is Not a Model Size Problem
 
-![Glare Analysis](https://drive.google.com/thumbnail?id=14fefm-M2h_YPaGsH39D2GDb1Sf8wz86f&sz=w1280)
+![Glare Analysis](exp2_glare_analysis.png)
 
 This is the finding I did not expect.
 
@@ -91,7 +83,7 @@ YOLOv8x on glare:           40.9%   worse
 
 ## Experiment 3: Detection Rate vs Distance
 
-![Distance Failure](https://drive.google.com/thumbnail?id=15VRS_e2iGvdUdvRfz729jAJjGRMjJDwJ&sz=w1280)
+![Distance Failure](exp3_distance_failure.png)
 
 Across all 8 scenarios the detection rate holds strong up to 40m. The sun glare scenario is the clear outlier, sitting at 40.9% regardless of distance because the failure is optical not geometric.
 
@@ -99,23 +91,25 @@ Across all 8 scenarios the detection rate holds strong up to 40m. The sun glare 
 
 ## Experiment 4: Semantic Misclassification Map
 
-![Misclassification Map](https://drive.google.com/thumbnail?id=1KPtlBV335msssiXTEAoZbe3XFmkh5I-j&sz=w1280)
+![Misclassification Map](exp4_misclassification.png)
 
 The model is not failing to detect. It is detecting the wrong thing. Every misclassification has a clear cause.
 
 Fire hydrant maps to bollard because both are short cylindrical objects at road level. Potted plant maps to desert vegetation because the shape profile is similar but the species are completely different. Train maps to ASU tram because tram is not in the vocabulary so the model picks the closest rail vehicle it knows.
 
+The dangerous misclassifications are the ones that change how a planner reacts. A sports ball the planner might ignore. A person the planner must stop for. Lens flare classified as sports ball is a safety-critical misclassification.
+
 ---
 
 ## Experiment 5: Model Size Does Not Fix Domain Shift
 
-![Model Comparison](https://drive.google.com/thumbnail?id=1hPXiHBkOzsl3OD8ImDAp5EGd7kWv65Iy&sz=w1280)
+![Model Comparison](exp5_model_comparison.png)
 
 I tested both YOLOv8n (3.2M parameters) and YOLOv8x (68M parameters) across all 8 scenarios.
 
-The large model improved significantly on scenarios where the nano model struggled with small or distant objects. Golf cart detection went from 68% to 97% because the larger model is better at recognizing partial views of small vehicles.
+The large model improved on scenarios where the nano model struggled with small or distant objects. Golf cart detection went from 68% to 97% because the larger model handles partial object views better.
 
-But on sun glare, the large model performed worse. This confirms what the domain shift literature says: you cannot scale your way out of a distribution mismatch. The model needs Arizona data, not more parameters.
+But on sun glare, the large model performed worse. This confirms what the domain shift literature says at PhD level: you cannot scale your way out of a distribution mismatch. The model needs Arizona data, not more parameters.
 
 | Scenario | YOLOv8n | YOLOv8x | Change |
 |----------|---------|---------|--------|
@@ -157,7 +151,7 @@ Model:              YOLOv8x (primary), YOLOv8n (comparison)
 Confidence:         0.25 threshold
 Distance est:       similar triangles
                     distance = (real_height x focal_length) / pixel_height
-                    iPhone focal length 1050px estimated
+                    iPhone focal length estimated at 1050px
 Classes tracked:    80 COCO classes
 Frames processed:   2,565 across 8 scenarios
 ```
